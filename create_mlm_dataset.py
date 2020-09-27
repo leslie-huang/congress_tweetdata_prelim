@@ -1,12 +1,10 @@
-import json
 import os
 import pandas as pd
-from pandas.io.json import json_normalize
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # Setup sql
-engine = create_engine("sqlite:///mlm_db.db")
+engine = create_engine("sqlite:///lm_db.db")
 
 session = sessionmaker()
 session.configure(bind=engine)

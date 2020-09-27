@@ -2,18 +2,17 @@ import json
 import os
 import pandas as pd
 from pandas.io.json import json_normalize
-import sys
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # Setup sql
-engine = create_engine("sqlite:///tweetsample.db")
+engine = create_engine("sqlite:///test.db")
 
 session = sessionmaker()
 session.configure(bind=engine)
 s = session()
 
-dirname = "sample/"
+dirname = "../congresstweets/data"
 
 
 ###################################################
@@ -29,7 +28,9 @@ legislator_sm_df = json_normalize(sm_data)[
 ]
 
 # need to lowercase for matching
-legislator_sm_df["social.twitter"] = legislator_sm_df["social.twitter"].str.lower()
+legislator_sm_df["social.twitter"] = legislator_sm_df[
+    "social.twitter"
+].str.lower()
 
 
 # get legislator - party mapping
@@ -52,7 +53,9 @@ def extract_legis_metadata(fn, keep_cols):
 
 
 current_legis = extract_legis_metadata("legislators-current.json", keep_cols)
-historical_legis = extract_legis_metadata("legislators-historical.json", keep_cols)
+historical_legis = extract_legis_metadata(
+    "legislators-historical.json", keep_cols
+)
 
 # combine legislator metadata
 all_legislators_metadata_df = pd.concat([current_legis, historical_legis])
@@ -76,10 +79,14 @@ combined_metadata.dropna(inplace=True)  # drop anyone with incomplete metadata
 for fname in [f for f in os.listdir(dirname) if f.endswith("json")]:
     temp_df = (
         pd.read_json(os.path.join(dirname, fname))
-        .drop(["source", "link", "time"], axis=1)
         .dropna()
         .replace("\n", " ", regex=True)
     )
+
+    if "source" in temp_df.columns:
+        temp_df.drop(["source", "link", "time"], axis=1, inplace=True)
+    else:
+        print(fname)
 
     # need to lowercase so that the merge keys match
     temp_df["screen_name"] = temp_df["screen_name"].str.lower()
@@ -114,7 +121,10 @@ unique_users = pd.read_sql_query(
     "SELECT DISTINCT(screen_name) FROM tweetsample", engine
 )
 filtered_combined_metadata = unique_users.merge(
-    combined_metadata, how="left", left_on="screen_name", right_on="social.twitter"
+    combined_metadata,
+    how="left",
+    left_on="screen_name",
+    right_on="social.twitter",
 )
 
 # to sql
