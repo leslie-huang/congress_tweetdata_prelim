@@ -1,3 +1,5 @@
+# Create a db with just tweet text and id for language model training
+
 import os
 import pandas as pd
 from sqlalchemy import create_engine
@@ -19,10 +21,14 @@ for fname in [f for f in os.listdir(dirname) if f.endswith("json")]:
         pd.read_json(os.path.join(dirname, fname))
         .dropna()
         .replace("\n", " ", regex=True)
-    )["text"]
+    )[["text", "id"]]
 
     temp_df.to_sql(
-        "mlm_data", con=engine, index=False, if_exists="append", chunksize=1000
+        "lm_tweets",
+        con=engine,
+        index=False,
+        if_exists="append",
+        chunksize=1000,
     )
 
     del temp_df

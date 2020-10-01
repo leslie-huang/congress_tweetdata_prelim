@@ -69,7 +69,11 @@ combined_metadata = legislator_sm_df.merge(
     right_on="id.govtrack",
 )
 
+print(f"combined_metadata before dropping NAs {combined_metadata.shape}")
+
 combined_metadata.dropna(inplace=True)  # drop anyone with incomplete metadata
+
+print(f"combined_metadata after dropping NAs {combined_metadata.shape}")
 
 ###################################################
 # Tweets to sql, filtering by users that metadata exists for
