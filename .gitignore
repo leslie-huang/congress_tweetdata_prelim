@@ -1,3 +1,4 @@
 sample/
 .mypy_cache/
 *.db
+*.jsonl
