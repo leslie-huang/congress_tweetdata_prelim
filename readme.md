@@ -36,4 +36,4 @@ python3 check_db_missing_tweets.py
 python3 create_mlm_dataset.py --db_path heldout.db --data_dir ../congresstweets/data/heldout_data
 ```
 
-where the data directory contains tweet jsons from 9/1/2020 through 9/26/2020
+where the data directory contains tweet jsons from 8/1/2020 through 9/26/2020
