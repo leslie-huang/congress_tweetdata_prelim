@@ -1,10 +1,9 @@
-import json
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 tweets_requested_fns = [
-    "tweet_ids_to_hydrate_115th.txt",
-    "tweet_ids_to_hydrate_116th.txt",
+    "tweet_hydrating_old/tweet_ids_to_hydrate_115th.txt",
+    "tweet_hydrating_old/tweet_ids_to_hydrate_116th.txt",
 ]
 
 # Setup sql
