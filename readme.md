@@ -53,12 +53,11 @@ The primary key is the tweet id (aka id_str). The total number of records is 161
 
 For the `tweetbert` classifiers, we use the large version of tweets from 2017 through 10/17/2020 from https://github.com/alexlitel/congresstweets/tree/master/data
 
-`classification_db.db` was created using
+`classification_db.db` was created in several steps:
 
-```
-python3 create_dataset.py
-```
+- `classification_dataset_inspect_metadata.ipynb` generates `classification_unfiltered.db` and makes a list of the unique twitter screennames included in it. Then metadata files from `unitedstates/congress-legislators` are merged together to get a mapping of twitter screen names to political party. The set difference of these lists of screen names is written to a csv
+- the missing metadata is filled in manually in `missing_metadata_filled.csv` -- this includes campaign and non-official accounts for politicians as well as caucus/committee/organizational twitter accounts that are clearly partisan
+- `classification_final.db` is generated, ONLY keeping tweets which (a) match the official metadata or (b) match the manually coded accounts
 
-This includes ONLY members of the House/Senate
 
-The primary key is the tweet id (aka id_str). The total number of records is
+The primary key is the tweet id (aka id_str). The total number of records in `classification_final.db` is 2271407, of which 1519295 are from official accounts
