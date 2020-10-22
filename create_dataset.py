@@ -4,9 +4,10 @@ import pandas as pd
 from pandas.io.json import json_normalize
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from typing import List
 
 # Setup sql
-engine = create_engine("sqlite:///test.db")
+engine = create_engine("sqlite:///classification_db.db")
 
 session = sessionmaker()
 session.configure(bind=engine)
@@ -15,9 +16,33 @@ s = session()
 dirname = "../congresstweets/data"
 
 
+engine.execute(
+    "CREATE TABLE IF NOT EXISTS tweets(id TEXT PRIMARY KEY, text TEXT, label INT, screen_name TEXT, user_id TEXT, id.govtrack FLOAT, type TEXT, state TEXT, party TEXT)"
+)
+
+engine.execute(
+    "CREATE TABLE IF NOT EXISTS users(id.govtrack FLOAT PRIMARY KEY, screen_name TEXT, social.twitter TEXT, social.twitter_id TEXT, type TEXT, state TEXT, party TEXT)"
+)
+
 ###################################################
 # get metadata first
 ###################################################
+
+
+def extract_legis_metadata(fn: str, keep_cols: List[str]):
+    with open(fn, "r") as f:
+        dat = json.load(f)
+    df = json_normalize(dat)
+
+    # fix ridiculous nested dict/list/idct
+    terms = pd.DataFrame(df.terms.tolist())[[0]]
+    terms.columns = ["col"]
+    terms = terms["col"].apply(pd.Series)[["type", "state", "party"]]
+
+    df = pd.concat([df, terms], axis=1)[keep_cols]
+
+    return df
+
 
 # get social media handle - legislator mapping
 with open("legislators-social-media.json", "r") as f:
@@ -35,22 +60,6 @@ legislator_sm_df["social.twitter"] = legislator_sm_df[
 
 # get legislator - party mapping
 keep_cols = ["id.govtrack", "type", "state", "party"]
-
-
-def extract_legis_metadata(fn, keep_cols):
-    with open(fn, "r") as f:
-        dat = json.load(f)
-    df = json_normalize(dat)
-
-    # fix ridiculous nested dict/list/idct
-    terms = pd.DataFrame(df.terms.tolist())[[0]]
-    terms.columns = ["col"]
-    terms = terms["col"].apply(pd.Series)[["type", "state", "party"]]
-
-    df = pd.concat([df, terms], axis=1)[keep_cols]
-
-    return df
-
 
 current_legis = extract_legis_metadata("legislators-current.json", keep_cols)
 historical_legis = extract_legis_metadata(
@@ -102,6 +111,8 @@ for fname in [f for f in os.listdir(dirname) if f.endswith("json")]:
         left_on="screen_name",
         right_on="social.twitter",
     )
+
+    # add 0-1 coding for political party
 
     temp_df.to_sql(
         "tweetsample",

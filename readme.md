@@ -1,16 +1,21 @@
 # DATASET CONSTRUCTION AND SOURCES
 
-`legislators-social-media.json`, `legislators-current.json`, and `legislators-historical.json` from https://github.com/unitedstates/congress-legislators
+`legislators-social-media.json`, `legislators-current.json`, and `legislators-historical.json` are from https://github.com/unitedstates/congress-legislators
 
 
 ## Language model pretraining dataset
 
-### Combines the following sources:
-- tweets from https://github.com/alexlitel/congresstweets/tree/master/data (through 9/26/2020)
+`lm_train.db` is a (de-duplicated) union of the following sources:
+- tweets from https://github.com/alexlitel/congresstweets/tree/master/data (through 8/1/2020)
 - tweets from the 115th and 116th Congresses, which were hydrated using https://github.com/DocNow/hydrator/
   - https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/UIVHQR
   - https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/MBOJNS
 
+The primary key is the tweet id (aka id_str). The total number of records is 5186977
+
+This includes both tweets from members of the House/Senate, as well as political parties, campaign accounts, etc and tweets that may be well outside of the timeframe of the other datasets
+
+### Generating this dataset requires the following steps:
 
 First run
 
@@ -29,11 +34,31 @@ Then check for missing tweets again (deleted tweets will continue to be in this 
 python3 check_db_missing_tweets.py
 ```
 
-## Heldout data for validation/test
 
-`heldout.db` was created using
+## Heldout data for validation/test of language models
+
+`lm_heldout.db` was created using
 ```
 python3 create_mlm_dataset.py --db_path heldout.db --data_dir ../congresstweets/data/heldout_data
 ```
 
-where the data directory contains tweet jsons from 8/1/2020 through 9/26/2020
+where the data directory contains tweet jsons from 8/1/2020 through 9/26/2020 from https://github.com/alexlitel/congresstweets/tree/master/data
+
+This includes ONLY members of the House/Senate
+
+The primary key is the tweet id (aka id_str). The total number of records is 161282
+
+
+## Dataset for classification
+
+For the `tweetbert` classifiers, we use the large version of tweets from 2017 through 10/17/2020 from https://github.com/alexlitel/congresstweets/tree/master/data
+
+`classification_db.db` was created using
+
+```
+python3 create_dataset.py
+```
+
+This includes ONLY members of the House/Senate
+
+The primary key is the tweet id (aka id_str). The total number of records is

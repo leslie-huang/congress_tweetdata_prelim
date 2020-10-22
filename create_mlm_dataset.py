@@ -48,7 +48,6 @@ for fname in [f for f in os.listdir(args.data_dir) if f.endswith("json")]:
     )
 
     del temp_df
-    data_for_df = []
 
     insert_into_sql = "INSERT OR IGNORE INTO tweets SELECT * FROM temp_table"
     engine.execute(insert_into_sql)

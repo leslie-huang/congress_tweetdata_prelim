@@ -2,3 +2,4 @@ sample/
 .mypy_cache/
 *.db
 *.jsonl
+.ipynb_checkpoints/
