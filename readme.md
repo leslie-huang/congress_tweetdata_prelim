@@ -29,7 +29,7 @@ Then add each dataset of hydrated tweets, checking for duplicates
 python3 hydrated_tweets_to_db.py --tweet_ids_fn tweet_ids_to_hydrate_115th.txt --tweet_json_fn hydrated_115th.jsonl
 ```
 
-Then check for missing tweets again (deleted tweets will continue to be in this list); this generates a txt file of the IDs of tweets we wanted but are not in the database
+Then check for missing tweets again (deleted tweets will continue to be in this list); this generates a txt file (`missing_tweets.txt`) of the IDs of tweets we wanted but are not in the database
 ```
 python3 check_db_missing_tweets.py
 ```
@@ -55,9 +55,18 @@ For the `tweetbert` classifiers, we use the large version of tweets from 2017 th
 
 `classification_db.db` was created in several steps:
 
-- `classification_dataset_inspect_metadata.ipynb` generates `classification_unfiltered.db` and makes a list of the unique twitter screennames included in it. Then metadata files from `unitedstates/congress-legislators` are merged together to get a mapping of twitter screen names to political party. The set difference of these lists of screen names is written to a csv
+- `classification_dataset_inspect_metadata.ipynb` generates `classification_unfiltered.db` and makes a list of the unique twitter screennames included in it. Then metadata files from `unitedstates/congress-legislators` are merged together to get a mapping of twitter screen names to political party. The set difference of these lists of screen names is written to `missing_metadata.csv`
 - the missing metadata is filled in manually in `missing_metadata_filled.csv` -- this includes campaign and non-official accounts for politicians as well as caucus/committee/organizational twitter accounts that are clearly partisan
-- `classification_final.db` is generated, ONLY keeping tweets which (a) match the official metadata or (b) match the manually coded accounts
-
+- `create_classification_dataset.ipynb` generates `classification_final.db`. this ONLY keeps tweets which (a) match the official metadata or (b) match the manually coded accounts
 
 The primary key is the tweet id (aka id_str). The total number of records in `classification_final.db` is 2271407, of which 1519295 are from official accounts
+
+*NOTE* Subsequently, in `tweetbert/example_nbs/08_example_polarity_per_legislator.ipynb` we identify case-sensitive variations in screen_name for the following people:
+  - RepTimmons
+  - RepGolden
+  - RepLucyMcBath
+  - RepDavidKustoff
+  - RepDavidTrone
+  - SenBooker
+
+  These were manually resolved in the `tweets` table of `classification_final.db`. Note that the multiple variations in screen_name do appear as separate entries in the `users` table
